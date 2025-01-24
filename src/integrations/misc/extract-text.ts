@@ -30,11 +30,9 @@ export async function extractTextFromFile(filePath: string): Promise<string> {
 
 async function extractTextFromPDF(filePath: string): Promise<string> {
 	const dataBuffer = await fs.readFile(filePath)
-
 	// Load PDF document
 	const loadingTask = pdfjs.getDocument({
 		data: dataBuffer,
-		disableWorker: true, // Disable worker for Node.js environment
 	})
 	const pdfDocument = await loadingTask.promise
 
@@ -44,8 +42,8 @@ async function extractTextFromPDF(filePath: string): Promise<string> {
 	for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
 		const page = await pdfDocument.getPage(pageNum)
 		const textContent = await page.getTextContent({
-			normalizeWhitespace: false,
-			disableCombineTextItems: false,
+			disableNormalization: false,
+			includeMarkedContent: false,
 		})
 
 		let pageText = ""
