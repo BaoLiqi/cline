@@ -78,6 +78,7 @@ const extensionConfig = {
 	platform: "node",
 	outfile: "dist/extension.js",
 	external: ["vscode"],
+	metafile: true,
 }
 
 async function main() {
@@ -85,7 +86,8 @@ async function main() {
 	if (watch) {
 		await extensionCtx.watch()
 	} else {
-		await extensionCtx.rebuild()
+		const result = await extensionCtx.rebuild()
+		console.log(await esbuild.analyzeMetafile(result.metafile))
 		await extensionCtx.dispose()
 	}
 }

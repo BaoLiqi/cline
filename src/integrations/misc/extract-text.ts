@@ -1,6 +1,5 @@
 import * as path from "path"
-// @ts-ignore-next-line
-import pdf from "pdf-parse/lib/pdf-parse"
+import * as pdfjs from "pdfjs-dist"
 import mammoth from "mammoth"
 import fs from "fs/promises"
 import { isBinaryFile } from "isbinaryfile"
@@ -31,8 +30,43 @@ export async function extractTextFromFile(filePath: string): Promise<string> {
 
 async function extractTextFromPDF(filePath: string): Promise<string> {
 	const dataBuffer = await fs.readFile(filePath)
-	const data = await pdf(dataBuffer)
-	return data.text
+
+	// Load PDF document
+	const loadingTask = pdfjs.getDocument({
+		data: dataBuffer,
+		disableWorker: true, // Disable worker for Node.js environment
+	})
+	const pdfDocument = await loadingTask.promise
+
+	let fullText = ""
+
+	// Process each page
+	for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+		const page = await pdfDocument.getPage(pageNum)
+		const textContent = await page.getTextContent({
+			normalizeWhitespace: false,
+			disableCombineTextItems: false,
+		})
+
+		let pageText = ""
+		let lastY = null
+
+		// Process text items
+		for (const item of textContent.items) {
+			const ty = item.transform[5] // Get Y position from transform matrix
+			if (lastY === ty) {
+				pageText += item.str
+			} else {
+				if (lastY !== null) pageText += "\n"
+				pageText += item.str
+				lastY = ty
+			}
+		}
+
+		fullText += `${pageText}\n\n`
+	}
+
+	return fullText.trim()
 }
 
 async function extractTextFromDOCX(filePath: string): Promise<string> {
