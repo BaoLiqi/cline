@@ -87,7 +87,7 @@ async function main() {
 		await extensionCtx.watch()
 	} else {
 		const result = await extensionCtx.rebuild()
-		console.log(await esbuild.analyzeMetafile(result.metafile))
+		// console.log(await esbuild.analyzeMetafile(result.metafile))
 		await extensionCtx.dispose()
 	}
 }
