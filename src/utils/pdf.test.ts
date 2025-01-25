@@ -5,9 +5,9 @@ import fs from "fs/promises"
 import path from "path"
 
 describe("PDF Parser", () => {
-	const testFilePath = path.join(__dirname, "..", "..", "..", "assets", "read-pdf-test", "test_document.pdf")
+	const testFilePath = path.join(__dirname, "..", "..", "..", "assets", "read-pdf-test", "README.pdf")
 
-	it("should extract text from test_document.pdf", async () => {
+	it("should extract text from pdf", async () => {
 		const buffer = await fs.readFile(testFilePath)
 		const result = await parsePDF(buffer)
 		const text = result.text.trim()
